@@ -1,0 +1,93 @@
+wasm.jsCode : BuildConfig ->{IO, Exception} BuildOutput
+wasm.jsCode config = warp config do
+  exposeFunction "version" jsVersion
+  exposeFunction "validate" jsValidate
+  exposeFunction "validateSchema" jsValidateSchema
+  exposeFunction "suggest" jsSuggest
+  exposeFunction "suggestSchema" jsSuggestSchema
+
+
+wasm.jsVersion : JSValue ->{Exception, JS} JSValue
+wasm.jsVersion _ = string VERSION
+
+wasm.jsSuggest : JSValue ->{Exception, JS} JSValue
+wasm.jsSuggest arg =
+  use Decoder <|> run
+  use WarpError raise
+  args = JSValue.asList arg
+  match args with
+    Some [t1, t2, t3, b1] ->
+      d = RootSchemaObjectDecoder <|> (SchemaDecoder |> Decoder.map rootSchema)
+      schemaText = t1 |> asText |> toGenericExceptionWith "no schema text" ()
+      instanceText =
+        t2 |> asText |> toGenericExceptionWith "no instance text" ()
+      pointerText = t3 |> asText |> toGenericExceptionWith "no pointer text" ()
+      inside = b1 |> asBoolean |> toGenericExceptionWith "no inside boolean" ()
+      schema = run d schemaText
+      instance = run Decoder.value instanceText
+      match Pointer.fromText pointerText with
+        Some pointer ->
+          pos = SuggestPos pointer inside
+          outputs = suggestLocal schema instance pos
+          string (outputs |> listToJson |> Json.toText)
+        None         -> raise "not a pointer" pointerText
+    _ -> raise "not a [string,string,string,boolean]" arg
+
+wasm.jsSuggestSchema : JSValue ->{Exception, JS} JSValue
+wasm.jsSuggestSchema arg =
+  use WarpError raise
+  args = JSValue.asList arg
+  match args with
+    Some [t2, t3, b1] ->
+      instanceText =
+        t2 |> asText |> toGenericExceptionWith "no instance text" ()
+      pointerText = t3 |> asText |> toGenericExceptionWith "no pointer text" ()
+      inside = b1 |> asBoolean |> toGenericExceptionWith "no inside boolean" ()
+      instance = Decoder.run Decoder.value instanceText
+      match Pointer.fromText pointerText with
+        Some pointer ->
+          pos = SuggestPos pointer inside
+          outputs = suggestSchemaLocal instance pos
+          string (outputs |> listToJson |> Json.toText)
+        None         -> raise "not a pointer" pointerText
+    _ -> raise "not a [string,string,boolean]" arg
+   
+
+wasm.jsValidate : JSValue ->{Exception, JS} JSValue
+wasm.jsValidate arg =
+  use Decoder <|> run
+  args = JSValue.asList arg
+  match args with
+    Some [t1, t2] ->
+      schemaText = t1 |> asText |> toGenericExceptionWith "no schema text" ()
+      instanceText =
+        t2 |> asText |> toGenericExceptionWith "no instance text" ()
+      d = RootSchemaObjectDecoder <|> (SchemaDecoder |> Decoder.map rootSchema)
+      schema = run d schemaText
+      instance = run Decoder.value instanceText
+      o = validateLocal validBasic schema instance
+      string (o |> output.toJson |> Json.toText)
+    _ -> WarpError.raise "not a [string,string]" arg
+
+wasm.jsValidateSchema : JSValue ->{Exception, JS} JSValue
+wasm.jsValidateSchema arg = match asText arg with
+  Some t ->
+    instance = Decoder.run Decoder.value t
+    o = validateSchemaLocal validBasic instance
+    string (o |> output.toJson |> Json.toText)
+  _      -> WarpError.raise "not a string" arg
+
+
+buildWasm : '{IO, Exception} ()
+buildWasm = do
+  use IO.FilePath /
+  config = BuildConfig [wasmOpt] NoReflection false false
+  buildOutput = jsCode config
+  wasmDir = FilePath "src/wasm"
+  wasm = wasmDir / "typedJson.wasm"
+  loader = wasmDir / "typedJsonLoader.js"
+  _ = writeFile wasm (moduleBytes buildOutput)
+  _ = writeFile loader (loaderBytes buildOutput)
+  ()
+
+

@@ -1,0 +1,9 @@
+node_modules/
+.vscode/
+.zed/
+.unisonHistory
+tmp/
+dist/
+src/wasm/*.wasm
+src/wasm/*.js
+/*.tgz
