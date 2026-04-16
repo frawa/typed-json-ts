@@ -11,5 +11,6 @@
     "outDir": "dist",
     "types": ["node"]
   },
-  "include": ["./src", "./src/wasm/*.wasm"]
+  "include": ["./src", "./src/wasm/*.wasm"],
+  "exclude": ["./dist"]
 }

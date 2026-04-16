@@ -13,11 +13,24 @@ describe('TypedJson', async () => {
 
   test('validate', async () => {
     const basicOutput = await typedJson.validate(`{"type":"string"}`, "13")
-    expect(basicOutput).toEqual({})
+    expect(basicOutput).toEqual({
+      valid: false, errors: [{
+        error: "expected type: string",
+        instanceLocation: "",
+        keywordLocation: "/type",
+      }]
+    })
   })
 
   test('suggest', async () => {
     const suggestOutput = await typedJson.suggest(`{"type":"string"}`, "13", "", false)
-    expect(suggestOutput).toEqual({})
+    expect(suggestOutput).toEqual([
+      {
+        location: "/type",
+        values: [
+          "",
+        ],
+      },
+    ])
   })
 });
