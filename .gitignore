@@ -4,6 +4,7 @@ node_modules/
 .unisonHistory
 tmp/
 dist/
+/*.output.md
 src/wasm/*.wasm
 src/wasm/*.js
 /*.tgz
