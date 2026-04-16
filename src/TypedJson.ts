@@ -40,7 +40,7 @@ export class TypedJson {
       const o: BasicOutput = decodeBasicOutput(JSON.parse(result));
       return Promise.resolve(o);
     } catch (e) {
-      console.log('local validate failed', e);
+      console.log('validate failed', e);
       return Promise.reject(e);
     }
   }
@@ -52,7 +52,7 @@ export class TypedJson {
       const o: BasicOutput = decodeBasicOutput(JSON.parse(result));
       return Promise.resolve(o);
     } catch (e) {
-      console.log('local validate schema failed', e);
+      console.log('validate schema failed', e);
       return Promise.reject(e);
     }
   }

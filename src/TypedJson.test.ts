@@ -11,4 +11,13 @@ describe('TypedJson', async () => {
     expect(typedJson.version()).toEqual("0.9.1");
   });
 
+  test('validate', async () => {
+    const basicOutput = await typedJson.validate(`{"type":"string"}`, "13")
+    expect(basicOutput).toEqual({})
+  })
+
+  test('suggest', async () => {
+    const suggestOutput = await typedJson.suggest(`{"type":"string"}`, "13", "", false)
+    expect(suggestOutput).toEqual({})
+  })
 });
