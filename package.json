@@ -1,6 +1,6 @@
 {
     "name": "typed-json-ts",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "Typescript bindings for typed-json.",
     "author": {
         "name": "Frank Wagner",
@@ -21,7 +21,7 @@
         "clean": "rimraf ./dist",
         "build:wasm": "ucm transcript build-wasm.md",
         "build:wasm:local": "ucm transcript.fork build-wasm-local.md",
-        "copy:wasm": "mkdir -p ./dist && cp ./src/wasm/* ./dist",
+        "copy:wasm": "mkdir -p ./dist/wasm && cp -r ./src/wasm ./dist",
         "build:ts": "tsc",
         "build": "npm run build:wasm && npm run copy:wasm && npm run build:ts",
         "build:local": "npm run build:wasm:local && npm run copy:wasm && npm run build:ts",
