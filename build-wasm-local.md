@@ -1,7 +1,7 @@
 ```ucm
 scratch/main> project.create build
-build/main> lib.install.local typed-json/main
-build/main> lib.install @dfreeman/warp/
+build/main> lib.install.local @frawa/typed-json/main
+build/main> lib.install.local @dfreeman/warp/
 build/main> ls lib
 ```
 
