@@ -80,8 +80,8 @@ wasm.jsValidateSchema arg = match asText arg with
 
 buildWasm : '{IO, Exception} ()
 buildWasm = do
-  use IO.FilePath /
-  config = BuildConfig [wasmOpt] NoReflection false false
+  use FilePath /
+  config = BuildConfig [esbuild] NoReflection false false
   buildOutput = jsCode config
   wasmDir = FilePath "src/wasm"
   wasm = wasmDir / "typedJson.wasm"
