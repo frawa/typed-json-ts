@@ -1,5 +1,5 @@
 wasm.jsCode : BuildConfig ->{IO, Exception} BuildOutput
-wasm.jsCode config = warp config do
+wasm.jsCode config = warp.silent config do
   exposeFunction "version" jsVersion
   exposeFunction "validate" jsValidate
   exposeFunction "validateSchema" jsValidateSchema
