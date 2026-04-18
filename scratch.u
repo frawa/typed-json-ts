@@ -16,18 +16,17 @@ wasm.jsSuggest arg =
   use WarpError raise
   args = JSValue.asList arg
   match args with
-    Some [t1, t2, t3, b1] ->
+    Some [t1, t2, t3] ->
       d = RootSchemaObjectDecoder <|> (SchemaDecoder |> Decoder.map rootSchema)
       schemaText = t1 |> asText |> toGenericExceptionWith "no schema text" ()
       instanceText =
         t2 |> asText |> toGenericExceptionWith "no instance text" ()
       pointerText = t3 |> asText |> toGenericExceptionWith "no pointer text" ()
-      inside = b1 |> asBoolean |> toGenericExceptionWith "no inside boolean" ()
       schema = run d schemaText
       instance = run Decoder.value instanceText
       match Pointer.fromText pointerText with
         Some pointer ->
-          pos = SuggestPos pointer inside
+          pos = SuggestPos pointer
           outputs = suggestLocal schema instance pos
           string (outputs |> listToJson |> Json.toText)
         None         -> raise "not a pointer" pointerText
@@ -38,15 +37,14 @@ wasm.jsSuggestSchema arg =
   use WarpError raise
   args = JSValue.asList arg
   match args with
-    Some [t2, t3, b1] ->
+    Some [t2, t3] ->
       instanceText =
         t2 |> asText |> toGenericExceptionWith "no instance text" ()
       pointerText = t3 |> asText |> toGenericExceptionWith "no pointer text" ()
-      inside = b1 |> asBoolean |> toGenericExceptionWith "no inside boolean" ()
       instance = Decoder.run Decoder.value instanceText
       match Pointer.fromText pointerText with
         Some pointer ->
-          pos = SuggestPos pointer inside
+          pos = SuggestPos pointer 
           outputs = suggestSchemaLocal instance pos
           string (outputs |> listToJson |> Json.toText)
         None         -> raise "not a pointer" pointerText

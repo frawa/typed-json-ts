@@ -8,7 +8,7 @@ describe("TypedJson", async () => {
 
   test("version", async () => {
     typedJson.version();
-    expect(typedJson.version()).toEqual("0.9.1");
+    expect(typedJson.version()).toEqual("0.10.0");
   });
 
   test("validate", async () => {
@@ -30,7 +30,6 @@ describe("TypedJson", async () => {
       `{"type":"string"}`,
       "13",
       "",
-      false,
     );
     expect(suggestOutput).toEqual([
       {

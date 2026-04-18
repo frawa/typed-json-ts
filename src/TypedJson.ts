@@ -8,8 +8,8 @@ import { loadUnisonModule } from "./wasm/typedJsonLoader.js";
 type VersionFun = () => string;
 type ValidateFun = (arg: [string, string]) => string;
 type ValidateSchemaFun = (arg: string) => string;
-type SuggestFun = (arg: [string, string, string, boolean]) => string;
-type SuggestSchemaFun = (arg: [string, string, boolean]) => string;
+type SuggestFun = (arg: [string, string, string]) => string;
+type SuggestSchemaFun = (arg: [string, string]) => string;
 
 export class TypedJson {
   public static async load(wasm?: string | ArrayBuffer): Promise<TypedJson> {
@@ -61,10 +61,9 @@ export class TypedJson {
     schema: string,
     instance: string,
     pointer: string,
-    inside: boolean,
   ): Promise<readonly SuggestionOutput[]> {
     try {
-      const result = this.wasmSuggest([schema, instance, pointer, inside]);
+      const result = this.wasmSuggest([schema, instance, pointer]);
       const o: readonly SuggestionOutput[] = decodeSuggestionOutput(
         JSON.parse(result),
       );
@@ -78,10 +77,9 @@ export class TypedJson {
   public suggestSchema(
     schema: string,
     pointer: string,
-    inside: boolean,
   ): Promise<readonly SuggestionOutput[]> {
     try {
-      const result = this.wasmSuggestSchema([schema, pointer, inside]);
+      const result = this.wasmSuggestSchema([schema, pointer]);
       const o: readonly SuggestionOutput[] = decodeSuggestionOutput(
         JSON.parse(result),
       );
