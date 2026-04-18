@@ -1,41 +1,41 @@
 {
-    "name": "typed-json-ts",
-    "version": "0.2.1",
-    "description": "Typescript bindings for typed-json.",
-    "author": {
-        "name": "Frank Wagner",
-        "email": "agilecoderfrank@gmail.com"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/frawa/typed-json-ts.git"
-    },
-    "license": "MIT",
-    "type": "module",
-    "files": [
-        "dist",
-        "LICENSE"
-    ],
-    "main": "dist/index.js",
-    "scripts": {
-        "clean": "rimraf ./dist",
-        "build:wasm": "ucm transcript build-wasm.md",
-        "build:wasm:local": "ucm transcript.fork build-wasm-local.md",
-        "copy:wasm": "mkdir -p ./dist/wasm && cp -r ./src/wasm ./dist",
-        "build:ts": "tsc",
-        "build": "npm run build:wasm && npm run copy:wasm && npm run build:ts",
-        "build:local": "npm run build:wasm:local && npm run copy:wasm && npm run build:ts",
-        "watch": "tsc -w",
-        "test": "vitest"
-    },
-    "engines": {
-        "node": ">=24.15.0"
-    },
-    "devDependencies": {
-        "@types/node": "^25.6.0",
-        "esbuild": "0.28.0",
-        "rimraf": "^6.1.3",
-        "typescript": "^6.0.2",
-        "vitest": "^4.1.4"
-    }
+  "name": "typed-json-ts",
+  "version": "0.10.0",
+  "description": "Typescript bindings for typed-json.",
+  "author": {
+    "name": "Frank Wagner",
+    "email": "agilecoderfrank@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frawa/typed-json-ts.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "main": "dist/index.js",
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "build:wasm": "ucm transcript build-wasm.md",
+    "build:wasm:local": "ucm transcript.fork build-wasm-local.md",
+    "copy:wasm": "mkdir -p ./dist/wasm && cp -r ./src/wasm ./dist",
+    "build:ts": "tsc",
+    "build": "npm run build:wasm && npm run copy:wasm && npm run build:ts",
+    "build:local": "npm run build:wasm:local && npm run copy:wasm && npm run build:ts",
+    "watch": "tsc -w",
+    "test": "vitest"
+  },
+  "engines": {
+    "node": ">=24.15.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "esbuild": "0.28.0",
+    "rimraf": "^6.1.3",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.4"
+  }
 }
