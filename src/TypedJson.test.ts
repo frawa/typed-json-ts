@@ -25,6 +25,20 @@ describe("TypedJson", async () => {
     });
   });
 
+  test("validate annotation", async () => {
+    const basicOutput = await typedJson.validate(`{"my":"mine"}`, `"foo"`);
+    expect(basicOutput).toEqual({
+      valid: true,
+      annotations: [
+        {
+          value: "mine",
+          instanceLocation: "",
+          keywordLocation: "/my",
+        },
+      ],
+    });
+  });
+
   test("suggest", async () => {
     const suggestOutput = await typedJson.suggest(
       `{"type":"string"}`,
