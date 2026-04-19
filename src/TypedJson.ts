@@ -13,7 +13,7 @@ type SuggestSchemaFun = (arg: [string, string]) => string;
 
 export class TypedJson {
   public static async load(wasm?: string | ArrayBuffer): Promise<TypedJson> {
-    return await loadFrom(wasm ?? "typedJson.wasm");
+    return await loadFrom(wasm ?? "wasm/typedJson.wasm");
   }
 
   constructor(exports: any) {
