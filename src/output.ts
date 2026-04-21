@@ -27,7 +27,9 @@ export function decodeBasicOutput(json: unknown): BasicOutput {
 export interface OutputUnit extends HasLocation {
   readonly valid: boolean;
   readonly errors?: readonly OutputUnit[]
-  readonly annotations?: readonly OutputUnit[]
+  readonly error?: string;
+  readonly annotations?: readonly OutputUnit[];
+  readonly annotation?: unknown;
 }
 
 export interface OutputAnnotation extends HasLocation {
