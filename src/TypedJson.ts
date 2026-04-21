@@ -1,4 +1,4 @@
-import { type BasicOutput, decodeBasicOutput } from "./basicOutput.js";
+import { type BasicOutput, decodeBasicOutput, decodeVerboseOutput, type VerboseOutput } from "./output.js";
 import {
   decodeSuggestionOutput,
   type SuggestionOutput,
@@ -19,6 +19,7 @@ export class TypedJson {
   constructor(exports: any) {
     this.wasmVersion = exports.version as VersionFun;
     this.wasmValidate = exports.validate as ValidateFun;
+    this.wasmValidateVerbose = exports.validateVerbose as ValidateFun;
     this.wasmValidateSchema = exports.validate as ValidateSchemaFun;
     this.wasmSuggest = exports.suggest as SuggestFun;
     this.wasmSuggestSchema = exports.suggestSchema as SuggestSchemaFun;
@@ -26,6 +27,7 @@ export class TypedJson {
 
   private readonly wasmVersion: VersionFun;
   private readonly wasmValidate: ValidateFun;
+  private readonly wasmValidateVerbose: ValidateFun;
   private readonly wasmValidateSchema: ValidateSchemaFun;
   private readonly wasmSuggest: SuggestFun;
   private readonly wasmSuggestSchema: SuggestSchemaFun;
@@ -41,6 +43,17 @@ export class TypedJson {
       return Promise.resolve(o);
     } catch (e) {
       console.log("validate failed", e);
+      return Promise.reject(e);
+    }
+  }
+
+  public validateVerbose(schema: string, instance: string): Promise<VerboseOutput> {
+    try {
+      const result = this.wasmValidateVerbose([schema, instance]);
+      const o: VerboseOutput = decodeVerboseOutput(JSON.parse(result));
+      return Promise.resolve(o);
+    } catch (e) {
+      console.log("validate verbose failed", e);
       return Promise.reject(e);
     }
   }

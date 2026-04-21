@@ -15,13 +15,11 @@ describe("TypedJson", async () => {
     const basicOutput = await typedJson.validate(`{"type":"string"}`, "13");
     expect(basicOutput).toEqual({
       valid: false,
-      errors: [
-        {
-          error: "expected type: string",
-          instanceLocation: "",
-          keywordLocation: "/type",
-        },
-      ],
+      errors: [{
+        error: "expected type: string",
+        instanceLocation: "",
+        keywordLocation: "/type",
+      }],
     });
   });
 
@@ -29,13 +27,111 @@ describe("TypedJson", async () => {
     const basicOutput = await typedJson.validate(`{"my":"mine"}`, `"foo"`);
     expect(basicOutput).toEqual({
       valid: true,
-      annotations: [
-        {
-          value: "mine",
-          instanceLocation: "",
-          keywordLocation: "/my",
+      annotations: [{
+        value: "mine",
+        instanceLocation: "",
+        keywordLocation: "/my",
+      }],
+    });
+  });
+
+  test("validateVerbose valid", async () => {
+    const schema = JSON.stringify({ type: "string" })
+    const instance = JSON.stringify("foo")
+    const verboseOutput = await typedJson.validateVerbose(schema, instance);
+    expect(verboseOutput).toEqual({
+      valid: true,
+      instanceLocation: "",
+      keywordLocation: "/type",
+    });
+  });
+
+  test("validateVerbose invalid", async () => {
+    const schema = JSON.stringify({ type: "string" })
+    const instance = JSON.stringify(13)
+    const verboseOutput = await typedJson.validateVerbose(schema, instance);
+    expect(verboseOutput).toEqual({
+      valid: false,
+      instanceLocation: "",
+      keywordLocation: "/type",
+      error: "expected type: string",
+    });
+  });
+
+  test("validateVerbose valid with annotation", async () => {
+    const schema = JSON.stringify({
+      "properties": {
+        "name": {
+          "type": "string"
         },
-      ],
+        "rating": {
+          "type": "number",
+          "renderer": "RatingRenderer"
+        }
+      }
+    })
+    const instance = JSON.stringify({
+      "name": "foo",
+      "rating": 0
+    })
+    const verboseOutput = await typedJson.validateVerbose(schema, instance);
+    expect(verboseOutput).toEqual({
+      valid: true,
+      instanceLocation: "",
+      keywordLocation: "/properties",
+      annotations: [{
+        valid: true,
+        instanceLocation: "/name",
+        keywordLocation: "/properties/name/type",
+      }, {
+        valid: true,
+        instanceLocation: "/rating",
+        keywordLocation: "/properties/rating/type",
+      }, {
+        valid: true,
+        instanceLocation: "/rating",
+        keywordLocation: "/properties/rating/renderer",
+        annotation: "RatingRenderer",
+      }],
+    });
+  });
+
+  test("validateVerbose invalid with annotation", async () => {
+    const schema = JSON.stringify({
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "number",
+          "renderer": "RatingRenderer"
+        }
+      }
+    })
+    const instance = JSON.stringify({
+      "name": 13,
+      "rating": 0
+    })
+    const verboseOutput = await typedJson.validateVerbose(schema, instance);
+    expect(verboseOutput).toEqual({
+      valid: false,
+      instanceLocation: "",
+      keywordLocation: "/properties",
+      errors: [{
+        valid: false,
+        instanceLocation: "/name",
+        keywordLocation: "/properties/name/type",
+        error: "expected type: string",
+      }, {
+        valid: true,
+        instanceLocation: "/rating",
+        keywordLocation: "/properties/rating/type",
+      }, {
+        valid: true,
+        instanceLocation: "/rating",
+        keywordLocation: "/properties/rating/renderer",
+        annotation: "RatingRenderer",
+      }],
     });
   });
 
