@@ -39,7 +39,6 @@ export interface VerboseOutput extends OutputUnit {
 
 export function decodeVerboseOutput(json: unknown): VerboseOutput {
   // TODO decoding
-  console.log("FW verbose", json)
   return json as VerboseOutput;
 }
 
