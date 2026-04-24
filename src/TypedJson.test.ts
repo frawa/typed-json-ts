@@ -8,7 +8,7 @@ describe("TypedJson", async () => {
 
   test("version", async () => {
     typedJson.version();
-    expect(typedJson.version()).toEqual("0.10.1");
+    expect(typedJson.version()).toEqual("0.10.2");
   });
 
   test("validate", async () => {
@@ -53,8 +53,13 @@ describe("TypedJson", async () => {
     expect(verboseOutput).toEqual({
       valid: false,
       instanceLocation: "",
-      keywordLocation: "/type",
-      error: "expected type: string",
+      keywordLocation: "",
+      errors: [{
+        valid: false,
+        instanceLocation: "",
+        keywordLocation: "/type",
+        error: "expected type: string",
+      }]
     });
   });
 
@@ -116,24 +121,62 @@ describe("TypedJson", async () => {
     expect(verboseOutput).toEqual({
       valid: false,
       instanceLocation: "",
-      keywordLocation: "/properties",
+      keywordLocation: "",
       errors: [{
         valid: false,
-        instanceLocation: "/name",
-        keywordLocation: "/properties/name/type",
-        error: "expected type: string",
-      }, {
-        valid: true,
-        instanceLocation: "/rating",
-        keywordLocation: "/properties/rating/type",
-      }, {
-        valid: true,
-        instanceLocation: "/rating",
-        keywordLocation: "/properties/rating/renderer",
-        annotation: "RatingRenderer",
+        instanceLocation: "",
+        keywordLocation: "/properties",
+        errors: [{
+          valid: false,
+          instanceLocation: "/name",
+          keywordLocation: "/properties/name",
+          errors: [{
+            "valid": false,
+            "keywordLocation": "/properties/name/type",
+            "instanceLocation": "/name",
+            "error": "expected type: string"
+          }],
+        },
+        {
+          valid: true,
+          instanceLocation: "/rating",
+          keywordLocation: "/properties/rating/type",
+        }, {
+          valid: true,
+          instanceLocation: "/rating",
+          keywordLocation: "/properties/rating/renderer",
+          annotation: "RatingRenderer",
+        }
+        ],
       }],
     });
   });
+
+  test("validateVerbose invalid with format", async () => {
+    const schema = JSON.stringify({
+      "type": "string",
+      "format": "date"
+    })
+    const instance = JSON.stringify(13);
+    const verboseOutput = await typedJson.validateVerbose(schema, instance);
+    expect(verboseOutput).toEqual({
+      valid: false,
+      keywordLocation: "",
+      instanceLocation: "",
+      errors: [{
+        valid: false,
+        keywordLocation: "/type",
+        instanceLocation: "",
+        error: "expected type: string"
+      },
+      {
+        valid: true,
+        keywordLocation: "/format",
+        instanceLocation: "",
+        annotation: "date"
+      }]
+    });
+  })
 
   test("suggest", async () => {
     const suggestOutput = await typedJson.suggest(
