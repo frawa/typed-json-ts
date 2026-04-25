@@ -8,7 +8,7 @@ describe("TypedJson", async () => {
 
   test("version", async () => {
     typedJson.version();
-    expect(typedJson.version()).toEqual("0.10.2");
+    expect(typedJson.version()).toEqual("0.10.3");
   });
 
   test("validate", async () => {
@@ -41,8 +41,13 @@ describe("TypedJson", async () => {
     const verboseOutput = await typedJson.validateVerbose(schema, instance);
     expect(verboseOutput).toEqual({
       valid: true,
+      keywordLocation: "",
       instanceLocation: "",
-      keywordLocation: "/type",
+      annotations: [{
+        valid: true,
+        keywordLocation: "/type",
+        instanceLocation: "",
+      }]
     });
   });
 
@@ -83,21 +88,37 @@ describe("TypedJson", async () => {
     expect(verboseOutput).toEqual({
       valid: true,
       instanceLocation: "",
-      keywordLocation: "/properties",
+      keywordLocation: "",
       annotations: [{
         valid: true,
-        instanceLocation: "/name",
-        keywordLocation: "/properties/name/type",
-      }, {
-        valid: true,
-        instanceLocation: "/rating",
-        keywordLocation: "/properties/rating/type",
-      }, {
-        valid: true,
-        instanceLocation: "/rating",
-        keywordLocation: "/properties/rating/renderer",
-        annotation: "RatingRenderer",
-      }],
+        instanceLocation: "",
+        keywordLocation: "/properties",
+        annotations: [{
+          valid: true,
+          instanceLocation: "/name",
+          keywordLocation: "/properties/name",
+          annotations: [{
+            valid: true,
+            instanceLocation: "/name",
+            keywordLocation: "/properties/name/type",
+          }]
+        }, {
+          valid: true,
+          instanceLocation: "/rating",
+          keywordLocation: "/properties/rating",
+          annotations:
+            [{
+              valid: true,
+              instanceLocation: "/rating",
+              keywordLocation: "/properties/rating/type",
+            }, {
+              valid: true,
+              instanceLocation: "/rating",
+              keywordLocation: "/properties/rating/renderer",
+              annotation: "RatingRenderer",
+            }],
+        }]
+      }]
     });
   });
 
@@ -118,36 +139,66 @@ describe("TypedJson", async () => {
       "rating": 0
     })
     const verboseOutput = await typedJson.validateVerbose(schema, instance);
-    expect(verboseOutput).toEqual({
-      valid: false,
-      instanceLocation: "",
-      keywordLocation: "",
-      errors: [{
+    expect(verboseOutput).toEqual(
+      {
         valid: false,
         instanceLocation: "",
-        keywordLocation: "/properties",
+        keywordLocation: "",
         errors: [{
           valid: false,
-          instanceLocation: "/name",
-          keywordLocation: "/properties/name",
+          instanceLocation: "",
+          keywordLocation: "/properties",
           errors: [{
-            "valid": false,
-            "keywordLocation": "/properties/name/type",
-            "instanceLocation": "/name",
-            "error": "expected type: string"
-          }],
-        },
-        {
-          valid: true,
-          instanceLocation: "/rating",
-          keywordLocation: "/properties/rating/type",
-        }, {
-          valid: true,
-          instanceLocation: "/rating",
-          keywordLocation: "/properties/rating/renderer",
-          annotation: "RatingRenderer",
-        }
-        ],
+            valid: false,
+            instanceLocation: "/name",
+            keywordLocation: "/properties/name",
+            errors: [{
+              valid: false,
+              instanceLocation: "/name",
+              keywordLocation: "/properties/name/type",
+              error: "expected type: string",
+            }]
+          }, {
+            valid: true,
+            instanceLocation: "/rating",
+            keywordLocation: "/properties/rating",
+            annotations:
+              [{
+                valid: true,
+                instanceLocation: "/rating",
+                keywordLocation: "/properties/rating/type",
+              }, {
+                valid: true,
+                instanceLocation: "/rating",
+                keywordLocation: "/properties/rating/renderer",
+                annotation: "RatingRenderer",
+              }],
+          }]
+        }]
+      }
+    );
+  });
+
+  test("validateVerbose valid with format", async () => {
+    const schema = JSON.stringify({
+      "type": "string",
+      "format": "date"
+    })
+    const instance = JSON.stringify("foo");
+    const verboseOutput = await typedJson.validateVerbose(schema, instance);
+    expect(verboseOutput).toEqual({
+      valid: true,
+      keywordLocation: "",
+      instanceLocation: "",
+      annotations: [{
+        valid: true,
+        keywordLocation: "/type",
+        instanceLocation: "",
+      }, {
+        valid: true,
+        keywordLocation: "/format",
+        instanceLocation: "",
+        annotation: "date",
       }],
     });
   });
