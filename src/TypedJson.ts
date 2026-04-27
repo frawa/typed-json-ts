@@ -1,4 +1,4 @@
-import { type BasicOutput, decodeBasicOutput, decodeVerboseOutput, type VerboseOutput } from "./output.js";
+import { type BasicOutput, decodeBasicOutput, decodeDetailedOutput, decodeFlagOutput, decodeVerboseOutput, type DetailedOutput, type VerboseOutput } from "./output.js";
 import {
   decodeSuggestionOutput,
   type SuggestionOutput,
@@ -6,10 +6,17 @@ import {
 import { loadUnisonModule } from "./wasm/typedJsonLoader.js";
 
 type VersionFun = () => string;
-type ValidateFun = (arg: [string, string]) => string;
-type ValidateSchemaFun = (arg: string) => string;
+type ValidateFun = (arg: [string, string, string]) => string;
+type ValidateSchemaFun = (arg: [string, string]) => string;
 type SuggestFun = (arg: [string, string, string]) => string;
 type SuggestSchemaFun = (arg: [string, string]) => string;
+
+interface OutputType {
+  flag: boolean;
+  basic: BasicOutput;
+  detailed: DetailedOutput;
+  verbose: VerboseOutput;
+}
 
 export class TypedJson {
   public static async load(wasm?: string | ArrayBuffer): Promise<TypedJson> {
@@ -19,7 +26,6 @@ export class TypedJson {
   constructor(exports: any) {
     this.wasmVersion = exports.version as VersionFun;
     this.wasmValidate = exports.validate as ValidateFun;
-    this.wasmValidateVerbose = exports.validateVerbose as ValidateFun;
     this.wasmValidateSchema = exports.validate as ValidateSchemaFun;
     this.wasmSuggest = exports.suggest as SuggestFun;
     this.wasmSuggestSchema = exports.suggestSchema as SuggestSchemaFun;
@@ -27,7 +33,6 @@ export class TypedJson {
 
   private readonly wasmVersion: VersionFun;
   private readonly wasmValidate: ValidateFun;
-  private readonly wasmValidateVerbose: ValidateFun;
   private readonly wasmValidateSchema: ValidateSchemaFun;
   private readonly wasmSuggest: SuggestFun;
   private readonly wasmSuggestSchema: SuggestSchemaFun;
@@ -36,10 +41,10 @@ export class TypedJson {
     return this.wasmVersion();
   }
 
-  public validate(schema: string, instance: string): Promise<BasicOutput> {
+  private validate<T extends keyof OutputType>(schema: string, instance: string, output: T, decode: (r: unknown) => OutputType[T]): Promise<OutputType[T]> {
     try {
-      const result = this.wasmValidate([schema, instance]);
-      const o: BasicOutput = decodeBasicOutput(JSON.parse(result));
+      const result = this.wasmValidate([schema, instance, output]);
+      const o = decode(JSON.parse(result));
       return Promise.resolve(o);
     } catch (e) {
       console.log("validate failed", e);
@@ -47,21 +52,25 @@ export class TypedJson {
     }
   }
 
+  public validateBasic(schema: string, instance: string): Promise<BasicOutput> {
+    return this.validate(schema, instance, 'basic', decodeBasicOutput)
+  }
+
+  public validateFlag(schema: string, instance: string): Promise<boolean> {
+    return this.validate(schema, instance, 'flag', decodeFlagOutput)
+  }
+
+  public validateDetailed(schema: string, instance: string): Promise<DetailedOutput> {
+    return this.validate(schema, instance, 'detailed', decodeDetailedOutput)
+  }
+
   public validateVerbose(schema: string, instance: string): Promise<VerboseOutput> {
-    try {
-      const result = this.wasmValidateVerbose([schema, instance]);
-      const o: VerboseOutput = decodeVerboseOutput(JSON.parse(result));
-      return Promise.resolve(o);
-    } catch (e) {
-      console.log("validate verbose failed", e);
-      return Promise.reject(e);
-    }
+    return this.validate(schema, instance, 'verbose', decodeVerboseOutput)
   }
 
   public validateSchema(schema: string): Promise<BasicOutput> {
-    // console.log("local validate schema", schema);
     try {
-      const result = this.wasmValidateSchema(schema);
+      const result = this.wasmValidateSchema([schema, 'basic']);
       const o: BasicOutput = decodeBasicOutput(JSON.parse(result));
       return Promise.resolve(o);
     } catch (e) {

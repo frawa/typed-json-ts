@@ -5,6 +5,11 @@ export interface BasicOutput {
   readonly annotations?: readonly BasicOutputAnnotation[];
 }
 
+export function decodeFlagOutput(json: unknown): boolean {
+  // TODO decoding
+  return json as boolean;
+}
+
 export interface HasLocation {
   readonly keywordLocation: string;
   readonly instanceLocation: string;
@@ -42,5 +47,12 @@ export interface VerboseOutput extends OutputUnit {
 export function decodeVerboseOutput(json: unknown): VerboseOutput {
   // TODO decoding
   return json as VerboseOutput;
+}
+export interface DetailedOutput extends OutputUnit {
+}
+
+export function decodeDetailedOutput(json: unknown): DetailedOutput {
+  // TODO decoding
+  return json as DetailedOutput;
 }
 

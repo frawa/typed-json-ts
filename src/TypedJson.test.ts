@@ -8,14 +8,28 @@ describe("TypedJson", async () => {
 
   test("version", async () => {
     typedJson.version();
-    expect(typedJson.version()).toEqual("0.10.3");
+    expect(typedJson.version()).toEqual("0.11.1");
   });
 
-  test("validate", async () => {
-    const basicOutput = await typedJson.validate(`{"type":"string"}`, "13");
+  test("validate flag", async () => {
+    const flag = await typedJson.validateFlag(`{"type":"string"}`, "13");
+    expect(flag).toEqual(false);
+  });
+
+  test("validate valid flag", async () => {
+    const flag = await typedJson.validateFlag(`{"type":"string"}`, '"foo"');
+    expect(flag).toEqual(true);
+  });
+
+  test("validate basic", async () => {
+    const basicOutput = await typedJson.validateBasic(`{"type":"string"}`, "13");
     expect(basicOutput).toEqual({
       valid: false,
       errors: [{
+        error: "a sub schema failed",
+        instanceLocation: "",
+        keywordLocation: "",
+      }, {
         error: "expected type: string",
         instanceLocation: "",
         keywordLocation: "/type",
@@ -23,8 +37,8 @@ describe("TypedJson", async () => {
     });
   });
 
-  test("validate annotation", async () => {
-    const basicOutput = await typedJson.validate(`{"my":"mine"}`, `"foo"`);
+  test("validate basic annotation", async () => {
+    const basicOutput = await typedJson.validateBasic(`{"my":"mine"}`, `"foo"`);
     expect(basicOutput).toEqual({
       valid: true,
       annotations: [{

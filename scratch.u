@@ -1,12 +1,10 @@
 wasm.jsCode : BuildConfig ->{IO, Exception} BuildOutput
-wasm.jsCode config = warp.silent config do
+wasm.jsCode config = silent config do
   exposeFunction "version" jsVersion
-  exposeFunction "validate" (jsValidate validBasic)
-  exposeFunction "validateVerbose" (jsValidate validVerbose)
+  exposeFunction "validate" jsValidate
   exposeFunction "validateSchema" jsValidateSchema
   exposeFunction "suggest" jsSuggest
   exposeFunction "suggestSchema" jsSuggestSchema
-
 
 wasm.jsVersion : JSValue ->{Exception, JS} JSValue
 wasm.jsVersion _ = string VERSION
@@ -45,37 +43,53 @@ wasm.jsSuggestSchema arg =
       instance = Decoder.run Decoder.value instanceText
       match Pointer.fromText pointerText with
         Some pointer ->
-          pos = SuggestPos pointer 
+          pos = SuggestPos pointer
           outputs = suggestSchemaLocal instance pos
           string (outputs |> listToJson |> Json.toText)
         None         -> raise "not a pointer" pointerText
     _ -> raise "not a [string,string,boolean]" arg
    
 
-wasm.jsValidate : Output -> JSValue ->{Exception, JS} JSValue
-wasm.jsValidate output arg =
+wasm.jsValidate : JSValue ->{Exception, JS} JSValue
+wasm.jsValidate arg =
   use Decoder <|> run
   args = JSValue.asList arg
   match args with
-    Some [t1, t2] ->
+    Some [t1, t2, t3] ->
       schemaText = t1 |> asText |> toGenericExceptionWith "no schema text" ()
       instanceText =
         t2 |> asText |> toGenericExceptionWith "no instance text" ()
+      outputTypeText =
+        t3 |> asText |> toGenericExceptionWith "no output type text" ()
       d = RootSchemaObjectDecoder <|> (SchemaDecoder |> Decoder.map rootSchema)
       schema = run d schemaText
       instance = run Decoder.value instanceText
+      output = initOutput outputTypeText
       o = validateLocal output schema instance
       string (o |> output.toJson |> Json.toText)
     _ -> WarpError.raise "not a [string,string]" arg
 
 wasm.jsValidateSchema : JSValue ->{Exception, JS} JSValue
-wasm.jsValidateSchema arg = match asText arg with
-  Some t ->
-    instance = Decoder.run Decoder.value t
-    o = validateSchemaLocal validBasic instance
-    string (o |> output.toJson |> Json.toText)
-  _      -> WarpError.raise "not a string" arg
+wasm.jsValidateSchema arg =
+  args = JSValue.asList arg
+  match args with
+    Some [t1, t2] ->
+      instanceText =
+        t1 |> asText |> toGenericExceptionWith "no instance text" ()
+      outputTypeText =
+        t2 |> asText |> toGenericExceptionWith "no output type text" ()
+      instance = Decoder.run Decoder.value instanceText
+      output = initOutput outputTypeText
+      o = validateSchemaLocal output instance
+      string (o |> output.toJson |> Json.toText)
+    _ -> WarpError.raise "not a [string,string]" args
 
+wasm.initOutput : Text -> Output
+wasm.initOutput = cases
+  "basic"    -> validBasic
+  "detailed" -> validDetailed
+  "verbose"  -> validVerbose
+  _          -> validFlag
 
 buildWasm : '{IO, Exception} ()
 buildWasm = do
@@ -89,8 +103,28 @@ buildWasm = do
   _ = writeFile loader (loaderBytes buildOutput)
   ()
 
-
 ---
+> catch do 
+    s = textToSchema """{
+            "type": "string",
+            "format": "bla"
+      }"""
+    i = textToInstance """
+        "asdf"
+      """ 
+    --validateDetailed s i
+    validateVerbose s i 
+---
+> catch do 
+    s = textToSchema """{
+            "type": "string",
+            "format": "bla"
+      }"""
+    i = textToInstance """
+        "asdf"
+      """ 
+    --validateDetailed s i
+    validateVerbose s i |> toJson
 > catch do 
     s = textToSchema """{
         "properties": {
