@@ -26,7 +26,7 @@ export class TypedJson {
   constructor(exports: any) {
     this.wasmVersion = exports.version as VersionFun;
     this.wasmValidate = exports.validate as ValidateFun;
-    this.wasmValidateSchema = exports.validate as ValidateSchemaFun;
+    this.wasmValidateSchema = exports.validateSchema as ValidateSchemaFun;
     this.wasmSuggest = exports.suggest as SuggestFun;
     this.wasmSuggestSchema = exports.suggestSchema as SuggestSchemaFun;
   }
@@ -51,6 +51,16 @@ export class TypedJson {
       return Promise.reject(e);
     }
   }
+  private validateSchema<T extends keyof OutputType>(schemaInstance: string, output: T, decode: (r: unknown) => OutputType[T]): Promise<OutputType[T]> {
+    try {
+      const result = this.wasmValidateSchema([schemaInstance, output]);
+      const o = decode(JSON.parse(result));
+      return Promise.resolve(o);
+    } catch (e) {
+      console.log("validate schema failed", e);
+      return Promise.reject(e);
+    }
+  }
 
   public validateBasic(schema: string, instance: string): Promise<BasicOutput> {
     return this.validate(schema, instance, 'basic', decodeBasicOutput)
@@ -68,15 +78,20 @@ export class TypedJson {
     return this.validate(schema, instance, 'verbose', decodeVerboseOutput)
   }
 
-  public validateSchema(schema: string): Promise<BasicOutput> {
-    try {
-      const result = this.wasmValidateSchema([schema, 'basic']);
-      const o: BasicOutput = decodeBasicOutput(JSON.parse(result));
-      return Promise.resolve(o);
-    } catch (e) {
-      console.log("validate schema failed", e);
-      return Promise.reject(e);
-    }
+  public validateSchemaBasic(schema: string): Promise<BasicOutput> {
+    return this.validateSchema(schema, 'basic', decodeBasicOutput)
+  }
+
+  public validateSchemaFlag(schema: string): Promise<boolean> {
+    return this.validateSchema(schema, 'flag', decodeFlagOutput)
+  }
+
+  public validateSchemaDetailed(schema: string): Promise<DetailedOutput> {
+    return this.validateSchema(schema, 'detailed', decodeDetailedOutput)
+  }
+
+  public validateSchemaVerbose(schema: string): Promise<VerboseOutput> {
+    return this.validateSchema(schema, 'verbose', decodeVerboseOutput)
   }
 
   public suggest(

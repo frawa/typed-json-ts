@@ -37,6 +37,20 @@ export interface OutputUnit extends HasLocation {
   readonly annotation?: unknown;
 }
 
+export function flattenErrors(o: OutputUnit): readonly OutputUnit[] {
+  const go: (o: OutputUnit) => readonly OutputUnit[] = o => {
+    return o.valid ? [] : [o, ...(o.errors?.flatMap(go) ?? [])]
+  }
+  return go(o);
+}
+
+export function flattenAnnotations(o: OutputUnit): readonly OutputUnit[] {
+  const go: (o: OutputUnit) => readonly OutputUnit[] = o => {
+    return o.valid ? [o, ...(o.annotations?.flatMap(go) ?? [])] : []
+  }
+  return go(o);
+}
+
 export interface OutputAnnotation extends HasLocation {
   readonly annotation: unknown;
 }

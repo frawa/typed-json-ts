@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { TypedJson } from "./TypedJson.js";
 import { readFileSync } from "node:fs";
+import { flattenAnnotations, flattenErrors } from "./output.js";
 
 describe("TypedJson", async () => {
   const wasmBuffer = readFileSync("./src/wasm/typedJson.wasm");
@@ -8,7 +9,7 @@ describe("TypedJson", async () => {
 
   test("version", async () => {
     typedJson.version();
-    expect(typedJson.version()).toEqual("0.11.1");
+    expect(typedJson.version()).toEqual("0.11.3");
   });
 
   test("validate flag", async () => {
@@ -241,6 +242,192 @@ describe("TypedJson", async () => {
         annotation: "date"
       }]
     });
+  })
+
+  test("validateSchemaFlag", async () => {
+    const schema = JSON.stringify({
+      "type": "boolean"
+    })
+    const output = await typedJson.validateSchemaFlag(schema);
+    expect(output).toEqual(true);
+  })
+
+  test("validateSchemaBasic", async () => {
+    const schema = JSON.stringify({
+      "type": "boolean"
+    })
+    const output = await typedJson.validateSchemaBasic(schema);
+    expect(output).toEqual({
+      "annotations": [
+        {
+          "instanceLocation": "",
+          "keywordLocation": "/(ignored \"$schema\")",
+          "value": "(ignored \"$schema\")",
+        },
+        {
+          "instanceLocation": "",
+          "keywordLocation": "/(ignored \"$vocabulary\")",
+          "value": "(ignored \"$vocabulary\")",
+        },
+        {
+          "instanceLocation": "",
+          "keywordLocation": "/title",
+          "value": "Core and Validation specifications meta-schema",
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/core#/(ignored \"$schema\")",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/(ignored \"$schema\")",
+          "value": "(ignored \"$schema\")",
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/core#/title",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/title",
+          "value": "Core vocabulary meta-schema",
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/core#/properties",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/properties",
+          "value": [],
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/applicator#/(ignored \"$schema\")",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/(ignored \"$schema\")",
+          "value": "(ignored \"$schema\")",
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/applicator#/title",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/title",
+          "value": "Applicator vocabulary meta-schema",
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/applicator#/properties",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/properties",
+          "value": [],
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/unevaluated#/(ignored \"$schema\")",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/(ignored \"$schema\")",
+          "value": "(ignored \"$schema\")",
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/unevaluated#/title",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/title",
+          "value": "Unevaluated applicator vocabulary meta-schema",
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/unevaluated#/properties",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/properties",
+          "value": [],
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/validation#/(ignored \"$schema\")",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/(ignored \"$schema\")",
+          "value": "(ignored \"$schema\")",
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/validation#/title",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/title",
+          "value": "Validation vocabulary meta-schema",
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/validation#/properties",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/properties",
+          "value": [
+            "type",
+          ],
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/meta-data#/(ignored \"$schema\")",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/(ignored \"$schema\")",
+          "value": "(ignored \"$schema\")",
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/meta-data#/title",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/title",
+          "value": "Meta-data vocabulary meta-schema",
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/meta-data#/properties",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/properties",
+          "value": [],
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/format-annotation#/(ignored \"$schema\")",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/(ignored \"$schema\")",
+          "value": "(ignored \"$schema\")",
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/format-annotation#/title",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/title",
+          "value": "Format vocabulary meta-schema for annotation results",
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/format-annotation#/properties",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/properties",
+          "value": [],
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/content#/(ignored \"$schema\")",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/(ignored \"$schema\")",
+          "value": "(ignored \"$schema\")",
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/content#/title",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/title",
+          "value": "Content vocabulary meta-schema",
+        },
+        {
+          "absoluteKeywordLocation": "https://json-schema.org/draft/2020-12/meta/content#/properties",
+          "instanceLocation": "",
+          "keywordLocation": "/allOf/$ref/properties",
+          "value": [],
+        },
+        {
+          "instanceLocation": "",
+          "keywordLocation": "/properties",
+          "value": [],
+        },
+      ],
+      "valid": true,
+    });
+  })
+
+  test("validateSchemaDetailed", async () => {
+    const schema = JSON.stringify({
+      "type": "boolean"
+    })
+    const output = await typedJson.validateSchemaDetailed(schema);
+    expect(flattenErrors(output).length).toEqual(0);
+    expect(flattenAnnotations(output).length).toEqual(80);
+  })
+
+  test("validateSchemaVerbose", async () => {
+    const schema = JSON.stringify({
+      "type": "boolean"
+    })
+    const output = await typedJson.validateSchemaVerbose(schema);
+    expect(flattenErrors(output).length).toEqual(0);
+    expect(flattenAnnotations(output).length).toEqual(82);
   })
 
   test("suggest", async () => {
