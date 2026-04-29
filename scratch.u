@@ -67,7 +67,7 @@ wasm.jsValidate arg =
       output = initOutput outputTypeText
       o = validateLocal output schema instance
       string (o |> output.toJson |> Json.toText)
-    _ -> WarpError.raise "not a [string,string]" arg
+    _ -> WarpError.raise "not a [string,string,string]" arg
 
 wasm.jsValidateSchema : JSValue ->{Exception, JS} JSValue
 wasm.jsValidateSchema arg =
