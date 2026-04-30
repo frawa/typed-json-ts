@@ -1,6 +1,6 @@
 {
   "name": "typed-json-ts",
-  "version": "0.11.3",
+  "version": "0.11.4",
   "description": "Typescript bindings for typed-json.",
   "author": {
     "name": "Frank Wagner",
