@@ -9,7 +9,7 @@ describe("TypedJson", async () => {
 
   test("version", async () => {
     typedJson.version();
-    expect(typedJson.version()).toEqual("0.11.4");
+    expect(typedJson.version()).toEqual("0.12.1");
   });
 
   test("validate flag", async () => {
@@ -494,5 +494,47 @@ describe("TypedJson", async () => {
         values: [""],
       },
     ]);
+  });
+
+  test("suggest v1", async () => {
+    const schema = JSON.stringify({
+      "$schema": "https://json-schema.org/v1",
+      "propertyDependencies": {
+        "foo": {
+          "bar": {
+            "const": 13
+          },
+          "gnu": {
+            "const": 42
+          }
+        }
+      }
+    })
+    {
+      const suggestOutput = await typedJson.suggest(
+        schema,
+        "{}",
+        "",
+      );
+      expect(suggestOutput).toEqual([
+        {
+          location: "/propertyDependencies",
+          values: [{ foo: "bar" }, { foo: "gnu" }],
+        },
+      ]);
+    }
+    {
+      const suggestOutput = await typedJson.suggest(
+        schema,
+        JSON.stringify({ foo: null }),
+        "/foo",
+      );
+      expect(suggestOutput).toEqual([
+        {
+          location: "/propertyDependencies",
+          values: ["bar", "gnu"],
+        },
+      ]);
+    }
   });
 });
