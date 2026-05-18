@@ -9,10 +9,13 @@ wasm.jsCode config = silent config do
 wasm.jsVersion : JSValue ->{Exception, JS} JSValue
 wasm.jsVersion _ = string VERSION
 
+use unison_json_1_4_2.Decoder run <|> value
+
 wasm.jsSuggest : JSValue ->{Exception, JS} JSValue
 wasm.jsSuggest arg =
-  use Decoder <|> run
+  use Decoder <|>
   use WarpError raise
+  use unison_json_1_4_2.Decoder run
   args = JSValue.asList arg
   match args with
     Some [t1, t2, t3] ->
@@ -40,7 +43,7 @@ wasm.jsSuggestSchema arg =
       instanceText =
         t2 |> asText |> toGenericExceptionWith "no instance text" ()
       pointerText = t3 |> asText |> toGenericExceptionWith "no pointer text" ()
-      instance = Decoder.run Decoder.value instanceText
+      instance = unison_json_1_4_2.Decoder.run Decoder.value instanceText
       match Pointer.fromText pointerText with
         Some pointer ->
           pos = SuggestPos pointer
@@ -52,7 +55,8 @@ wasm.jsSuggestSchema arg =
 
 wasm.jsValidate : JSValue ->{Exception, JS} JSValue
 wasm.jsValidate arg =
-  use Decoder <|> run
+  use Decoder <|>
+  use unison_json_1_4_2.Decoder run
   args = JSValue.asList arg
   match args with
     Some [t1, t2, t3] ->
@@ -78,7 +82,7 @@ wasm.jsValidateSchema arg =
         t1 |> asText |> toGenericExceptionWith "no instance text" ()
       outputTypeText =
         t2 |> asText |> toGenericExceptionWith "no output type text" ()
-      instance = Decoder.run Decoder.value instanceText
+      instance = unison_json_1_4_2.Decoder.run Decoder.value instanceText
       output = initOutput outputTypeText
       o = validateSchemaLocal output instance
       string (o |> output.toJson |> Json.toText)

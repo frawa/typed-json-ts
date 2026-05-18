@@ -9,7 +9,7 @@ describe("TypedJson", async () => {
 
   test("version", async () => {
     typedJson.version();
-    expect(typedJson.version()).toEqual("0.12.1");
+    expect(typedJson.version()).toEqual("0.13.1");
   });
 
   test("validate flag", async () => {
